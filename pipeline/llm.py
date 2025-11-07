@@ -3,7 +3,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import json
 import os
+import logging
 import re
+import time
 
 class ATCAssistantLLM:
     """
@@ -11,14 +13,19 @@ class ATCAssistantLLM:
     - Converting ATC messages to structured JSON commands.
     - Generating pilot response text.
     """
-    def __init__(self, model_name="google/gemma-3-4b-it", save_path="example", device="cuda"):
+    def __init__(self, logger, model_name="google/gemma-3-4b-it", device="cuda"):
+        self.logger = logger
         self.device = device
-        self.save_path = save_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
-        print(f"[ATCParserLLM] Init Ok! Device: {self.device}")
+        self.logger.info(f"[ATCParserLLM] Init Ok! Device: {self.device}")
 
-    def generate_json(self, atc_text, file_name="command.json", max_new_tokens=128):
+    def generate_json(self, atc_text, json_path, max_new_tokens=128):
+        """
+        Convert ATC command to structured JSON
+        """
+
+        start_time = time.time()
 
         # Define prompts
         system_prompt = (
@@ -46,13 +53,11 @@ class ATCAssistantLLM:
             return_tensors="pt",
         ).to(self.model.device)
 
-        # Inference
+        # Convert to JSON
         outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
-
-        # Decode
         generated_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:])
 
-        # Clean
+        # Clean output
         match = re.search(r"\{.*\}", generated_text, re.DOTALL)
         if match:
             json_text = match.group(0)
@@ -63,19 +68,15 @@ class ATCAssistantLLM:
         else:
             parsed = generated_text
 
-        # Print JSON data
-        if isinstance(parsed, dict):
-            print("[ATCParserLLM] JSON Output:")
-            print(json.dumps(parsed, indent=4, ensure_ascii=False))
-        else:
-            # fallback if output is a string
-            print("[ATCParserLLM] Raw output:", parsed)
-
         # Save JSON
-        save_file = os.path.join(self.save_path, file_name)
-        with open(save_file, "w") as f:
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+        with open(json_path, "w") as f:
             json.dump(parsed, f, indent=4)
-        print(f"[ATCParserLLM] JSON saved to {save_file}")
+        self.logger.info(f"[ATCParserLLM] JSON saved to {json_path}")
+
+        # Log result JSON and elapsed time
+        elapsed = time.time() - start_time
+        self.logger.info(f"[ATCAssistantLLM] Generate JSON ({elapsed:.2f}s): {json.dumps(parsed, indent=4, ensure_ascii=False)}")
 
         return parsed
 
@@ -83,6 +84,7 @@ class ATCAssistantLLM:
         """
         Generate a pilot response text based on structured ATC JSON command.
         """
+        start_time = time.time()
 
         system_prompt = (
             "You are a pilot receiving ATC commands. "
@@ -115,18 +117,29 @@ class ATCAssistantLLM:
                                               skip_special_tokens=True
                                               ).strip()
         
-        print(f"[generate_pilot_answer]: {response_text}")
+        elapsed = time.time() - start_time
+        self.logger.info(f"[ATCAssistantLLM] Pilot reply ({elapsed:.2f}s): {response_text}")
         return response_text
 
 
 if __name__ == "__main__":
-    llm = ATCAssistantLLM()
-    atc_text = "DLH5 Climb and maintain FL350, heading 270"
+    # Manual test: run with `python3 pipeline/llm.py`
+    atc_command = "DLH5 Climb and maintain FL350, heading 270"
+
+    # Init logger
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        filename="demo/output/llm.log"
+    )
+    logger = logging.getLogger("ATCAssistantLLM_Test")
+
+    # Initialize LLM assistant
+    llm = ATCAssistantLLM(logger)
+
+    # Generate JSON from text commaand
+    command_json = llm.generate_json(atc_command)
     
-    # Generate JSON
-    command_json = llm.generate_json(atc_text)
-    print("[ATCParserLLM] JSON Output:", command_json)
-    
-    # Generate pilot reply
+    # Generate pilot reply from JSON
     pilot_reply = llm.generate_pilot_answer(command_json)
-    print("[ATCParserLLM] Pilot Reply:", pilot_reply)
