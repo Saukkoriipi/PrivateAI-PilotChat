@@ -29,14 +29,15 @@ class ATCAssistantLLM:
 
         # Define prompts
         system_prompt = (
-            "You are an ATC parser. Text is an ATC controller-to-pilot message. "
-            "Convert messages into structured JSON commands. Do NOT include explanations. "
-            "Rules:\n"
-            "- 'callsign' is REQUIRED. If the callsign contains spelling mistakes, select the closest valid ICAO callsign.\n"
-            "- Optional fields: 'heading', 'turn_direction', 'to_altitude', 'rate_of_climb', 'vertical_movement'.\n"
-            "- 'vertical_movement' must be 'climb' or 'descent' if indicated in the text.\n"
-            "- 'turn_direction' must be 'left' or 'right' if a turn is mentioned.\n"
-            "- Return only valid JSON, do not add extra text or commentary."
+            "You are an ATC (Air Traffic Control) parser. The text provided is an ATC controller-to-pilot message. "
+            "The text may contain spelling and grammar mistakes, which you need to correct. "
+            "Convert the message into a structured JSON format without including any explanations. "
+            "Follow these rules:\n"
+            "- The 'callsign' field is REQUIRED. If the callsign contains spelling mistakes, select the closest possible ICAO callsign.\n"
+            "- Optional fields include: 'heading', 'turn_direction', 'to_altitude', 'rate_of_climb', 'vertical_movement'.\n"
+            "- 'vertical_movement' must be either 'climb' or 'descent' if indicated in the text.\n"
+            "- If a turn is mentioned, 'turn_direction' must be either 'left' or 'right'.\n"
+            "- Return ONLY valid JSON. Do not add any extra text or commentary."
         )
         user_prompt = f"Convert the following ATC message to JSON: {atc_text}"
         messages = [
@@ -86,8 +87,8 @@ class ATCAssistantLLM:
         """
         start_time = time.time()
 
-        system_prompt = (
-            "You are a pilot receiving ATC commands. "
+        system_prompt = """
+            "You are a airline pilot receiving air traffic controller commands. Use ICAO phraseology. "
             "Based on the provided ATC JSON command, generate a concise, natural response the pilot would say. "
             "Convert ICAO callsigns to radio callsigns using the following mapping:\n"
             "- FIN -> Finnair\n"
@@ -96,7 +97,7 @@ class ATCAssistantLLM:
             "- AFR -> Air France\n"
             "- UAL -> United\n"
             "Do NOT include explanations or extra commentary."
-        )
+        """
 
         user_prompt = f"ATC command JSON: {json.dumps(atc_json)}"
         messages = [

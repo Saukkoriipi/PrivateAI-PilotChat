@@ -6,6 +6,7 @@ import time
 import logging
 import os
 from datetime import datetime
+import re
 
 class WhisperASR:
     def __init__(self, model_name, device, logger):
@@ -50,9 +51,12 @@ class WhisperASR:
         )
         transcription = self.processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 
+        # Clean transcription
+        transcription = re.sub(r'[^a-zA-Z0-9\s]', '', transcription).strip().upper()
+    
         # Print results
         elapsed = time.time() - start_time
-        self.logger.info(f"[WhisperASR] Transcription result ({elapsed:.2f}s): {transcription}")
+        self.logger.info(f"[WhisperASR] Transcription result ({elapsed:.2f}s): '{transcription}'")
 
         return transcription
 
