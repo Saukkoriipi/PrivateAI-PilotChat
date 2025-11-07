@@ -42,6 +42,7 @@ class pipeline:
                             )
 
     def run(self, audio_input, sample_id=0):
+        self.logger.info(f"[pipeline.run] Start processing: {audio_input}")
 
         # Define paths where we save all logs and conversions
         json_path = os.path.join(self.results_folder, f"{sample_id}.json")
