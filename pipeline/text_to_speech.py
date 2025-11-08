@@ -192,9 +192,20 @@ class PilotTTS:
 if __name__ == "__main__":
     # Manual test: run with `python3 pipeline/text_to_audio.py `
     device="cuda"
-    description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
-    text = "Finnair five-two-two turn left heading two-five-zero decent to flight level three-six-zero"
-    save_path = "demo/input/atc4.wav"
+
+    # Example accent styles
+    description_atc = "Midwest woman. Normal pitch, warm timbre, fast quick hurry pacing."
+    description_uk = "Realistic male voice in the 40s age with british accent. Normal pitch, warm timbre, fast pacing."
+    description_us = "Realistic male voice in the 60s age with american accent. Normal pitch, warm timbre, fast pacing."
+
+    # Example text to speak
+    #text_atc = "Speedbird three two seven, turn left heading two seven zero, descend to flight level two eight zero."
+    text_pilot = "turn left heading two seven zero, descend to flight level two eight zero, Speedbird three two seven."
+    #text_atc = "Delta two zero nine turn right heading one eight zero descend to four thousand feet QNH niner niner eight, reduce speed to two one zero knots."
+    #text_pilot = "Turn right heading one eight zero descend to four thousand feet QNH niner niner eight, reduce speed to two one zero knots, Delta two zero nine."
+
+    # Save audio path
+    save_path = "demo/output/atc3.wav"
 
     # Init logger
     logging.basicConfig(
@@ -210,7 +221,7 @@ if __name__ == "__main__":
     tts = PilotTTS(device, logger)
 
     # Convert text-to-speech
-    pilot_speech = tts.synthesize(text, description)
+    pilot_speech = tts.synthesize(text_pilot, description_uk)
 
     # Save audio
     tts.save(pilot_speech, save_path)
