@@ -6,9 +6,22 @@
 All processing — speech recognition, command interpretation, and voice synthesis — happens locally.  
 No cloud. No data sharing. No subscriptions. 100% private and free.
 
-> ⚙️ **Development Status:**  
-> The project is in active development.  
-> Current limitations include pipeline speed (≈5 seconds per run) and imperfect command parsing — both actively being improved.
+
+> ⚙️ **Development Status:**
+> The project is in active development.
+
+### Current Limitations
+
+* **Audio → JSON conversion**: Not always reliable; transcription and parsing may occasionally produce spelling mistakes.
+* **JSON → Pilot readback**:
+
+  * Full-featured TTS (text_to_speech.py) is slower (~3 seconds per response) but produces high-quality multi-voice output.
+  * Fast TTS (text_to_speech_fast.py) is very quick (~0.3 seconds) but only supports a single voice.
+
+* **Pipeline runtime**: Overall pipeline takes 2–5 seconds per run, depending on system setup.
+
+
+> Improvements to command parsing, transcription reliability, and pipeline speed are actively underway.
 
 
 > ✈️ **Designed for IFR and Area Control:**  
@@ -111,11 +124,13 @@ Then:
 
 ```
 pipeline/
- ├── audio_to_text.py      # Whisper ASR
- ├── atc_assistant_llm.py  # Command parser and response logic
- ├── text_to_audio.py      # Pilot TTS generator
- ├── utils.py              # Audio utilities
- └── pipeline.py           # Main execution pipeline
+ ├── speech_to_text.py         # Converts ATC audio commands to text (Whisper ASR)
+ ├── text_to_json.py           # Converts ATC text commands into structured JSON
+ ├── json_to_pilot_reply.py    # Generates ICAO-style pilot readback from JSON
+ ├── text_to_speech.py         # Full-featured pilot TTS (multiple voices, slower)
+ ├── text_to_speech_fast.py    # Fast pilot TTS (single voice)
+ └──  pipeline.py               # Main execution pipeline orchestrating the full flow
+
 ```
 
 ---
