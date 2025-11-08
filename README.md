@@ -28,7 +28,7 @@ No cloud. No data sharing. No subscriptions. 100% private and free.
    ```bash
    git clone https://github.com/yourusername/PrivateAI-PilotChat.git
    cd PrivateAI-PilotChat
-````
+   ```
 
 2. **Install dependencies**
 
@@ -43,6 +43,42 @@ No cloud. No data sharing. No subscriptions. 100% private and free.
    * TTS (Pilot voice)
 
    > See `models/README.md` for setup instructions.
+
+---
+
+## 🎧 Audio Examples
+
+Below are sample ATC–Pilot exchanges generated locally by **PrivateAI-PilotChat**:
+
+### Example 1 — **British Airways**
+
+**ATC Command:** `BAW327 turn left heading 270 descend to flight level 280`
+
+<audio controls>  
+  <source src="demo/input/atc1.wav" type="audio/wav">  
+</audio>  
+
+**Pilot Response:**
+
+<audio controls>  
+  <source src="demo/output/pilot1.wav" type="audio/wav">  
+</audio>  
+
+---
+
+### Example 2 — **Delta Airlines**
+
+**ATC Command:** `DAL209 turn right heading 180 descend to 4000 feet qnh 998 reduce speed to 210 knots`
+
+<audio controls>  
+  <source src="demo/input/atc2.wav" type="audio/wav">  
+</audio>  
+
+**Pilot Response:**
+
+<audio controls>  
+  <source src="demo/output/pilot2.wav" type="audio/wav">  
+</audio>  
 
 ---
 
