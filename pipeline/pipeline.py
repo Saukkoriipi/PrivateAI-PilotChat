@@ -1,10 +1,13 @@
 from utils import load_audio, play_audio
 from speech_to_text import WhisperASR
-from llm import ATCAssistantLLM
+from text_to_json import ATCAssistantLLM
 from text_to_speech import PilotTTS
+from text_to_speech_fast import MMSTTS
+from json_to_pilot_reply import ATCJsonConverter
 import glob
 import os
 import logging
+import time
 
 
 class pipeline:
@@ -28,21 +31,37 @@ class pipeline:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.info("Pipeline initialized")
 
-        # Initialize models
+        # Initialize models for the ATC-to-Pilot pipeline
+
+        # 1. Automatic Speech Recognition (ASR)
+        #    Converts ATC spoken commands into text
         self.asr = WhisperASR(model_name="openai/whisper-small", 
                               device=device, 
                               logger=self.logger
                               )
+        
+        # 2. Language model (LLM) for text-to-JSON conversion
+        #    Converts ATC text commands into structured JSON instructions
         self.llm = ATCAssistantLLM(model_name="google/gemma-3-4b-it",
                                    device=device,
                                    logger=self.logger
                                    )
-        self.tts = PilotTTS(device=device, 
-                            logger=self.logger
-                            )
+        
+        # 3. JSON-to-Pilot response converter
+        #    Generates ICAO-style pilot readback from structured ATC JSON
+        self.json_to_pilot = ATCJsonConverter(logger=self.logger)
+
+        # 4. Text-to-Speech (TTS) for pilot readback
+        #    Converts the pilot response text into audio
+        #    Option 1: PilotTTS (slower, supports multiple voices/accents)
+        #    Option 2: MMSTTS (faster, single voice)
+        #self.tts = PilotTTS(device=device, logger=self.logger)
+        self.tts = MMSTTS(device=device, logger=self.logger)
+
 
     def run(self, audio_input, sample_id=0):
         self.logger.info(f"[pipeline.run] Start processing: {audio_input}")
+        start_time = time.time()  # start full pipeline timer
 
         # Define paths where we save all logs and conversions
         json_path = os.path.join(self.results_folder, f"{sample_id}.json")
@@ -55,13 +74,16 @@ class pipeline:
         command_json = self.llm.generate_json(atc_text, json_path)
 
         # 3. Command JSON → pilot response text
-        pilot_text = self.llm.generate_pilot_answer(command_json)
+        pilot_text = self.json_to_pilot.generate_pilot_readback(command_json)
 
         # 4. Pilot response to audio
         description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
         pilot_speech = self.tts.synthesize(pilot_text, description)
         self.tts.save(pilot_speech, audio_path)
         
+        # Log total time
+        self.logger.info(f"[pipeline.run] Finished processing in '{(time.time() - start_time):.2f}' seconds")
+
 
 
 if __name__ == "__main__":

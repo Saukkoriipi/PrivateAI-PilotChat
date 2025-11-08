@@ -56,7 +56,7 @@ class WhisperASR:
     
         # Print results
         elapsed = time.time() - start_time
-        self.logger.info(f"[WhisperASR] Transcription result ({elapsed:.2f}s): '{transcription}'")
+        self.logger.info(f"[WhisperASR] Transcription result '({elapsed:.2f}s)': '{transcription}'")
 
         return transcription
 

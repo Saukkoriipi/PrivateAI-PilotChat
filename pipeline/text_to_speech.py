@@ -195,17 +195,17 @@ if __name__ == "__main__":
 
     # Example accent styles
     description_atc = "Midwest woman. Normal pitch, warm timbre, fast quick hurry pacing."
-    description_uk = "Realistic male voice in the 40s age with british accent. Normal pitch, warm timbre, fast pacing."
-    description_us = "Realistic male voice in the 60s age with american accent. Normal pitch, warm timbre, fast pacing."
+    #description_uk = "Realistic male voice in the 40s age with british accent. Normal pitch, warm timbre, fast pacing."
+    #description_us = "Realistic male voice in the 60s age with american accent. Normal pitch, warm timbre, fast pacing."
 
     # Example text to speak
-    #text_atc = "Speedbird three two seven, turn left heading two seven zero, descend to flight level two eight zero."
-    text_pilot = "turn left heading two seven zero, descend to flight level two eight zero, Speedbird three two seven."
+    text_atc = "Finnair five five two papa, turn left heading two seven zero, descend to flight level two eight zero."
+    #text_pilot = "turn left heading two seven zero, descend to flight level two eight zero, Speedbird three two seven."
     #text_atc = "Delta two zero nine turn right heading one eight zero descend to four thousand feet QNH niner niner eight, reduce speed to two one zero knots."
     #text_pilot = "Turn right heading one eight zero descend to four thousand feet QNH niner niner eight, reduce speed to two one zero knots, Delta two zero nine."
 
     # Save audio path
-    save_path = "demo/output/atc3.wav"
+    save_path = "demo/input/atc3.wav"
 
     # Init logger
     logging.basicConfig(
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     tts = PilotTTS(device, logger)
 
     # Convert text-to-speech
-    pilot_speech = tts.synthesize(text_pilot, description_uk)
+    pilot_speech = tts.synthesize(text_atc, description_atc)
 
     # Save audio
     tts.save(pilot_speech, save_path)
