@@ -1,5 +1,4 @@
-# Private AI-Pilot Chat App
-
+# ATC-Pilot Chat
 
 ![PrivateAI-PilotChat](img.png)
 
@@ -21,31 +20,6 @@ No cloud. No data sharing. No subscriptions. 100% private and free.
 - **Training tool:** ideal for ATC students and simulator developers.
 
 ---
-
-## Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/PrivateAI-PilotChat.git
-   cd PrivateAI-PilotChat
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Download or place models**
-
-   * ASR (Whisper)
-   * LLM (ATC Assistant)
-   * TTS (Pilot voice)
-
-   > See `models/README.md` for setup instructions.
-
----
-
 ## 🎧 Audio Examples
 
 Below are sample ATC–Pilot exchanges generated locally by **PrivateAI-PilotChat**:
@@ -82,6 +56,27 @@ Below are sample ATC–Pilot exchanges generated locally by **PrivateAI-PilotCha
 
 ---
 
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/PrivateAI-PilotChat.git
+   cd PrivateAI-PilotChat
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Download or place models**
+
+   * No manual download is required. All necessary models (ASR, LLM, TTS) are automatically downloaded the first time you run the pipeline or app.
+
+---
+
+
 ## Usage
 
 Run the main pipeline:
@@ -99,7 +94,7 @@ python app.py
 Then:
 
 * Speak your ATC instruction.
-* The system transcribes, interprets, and responds with a synthetic pilot voice.
+* The system will transcribe your audio, interpret the command, save it as structured JSON, and respond with a synthetic pilot voice.
 
 ---
 
@@ -124,5 +119,4 @@ You are free to use, modify, and distribute with attribution.
 ---
 
 *Work in progress — more documentation, model configuration, and UI details coming soon.*
-
-```
+---
