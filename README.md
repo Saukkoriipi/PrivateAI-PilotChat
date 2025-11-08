@@ -8,16 +8,25 @@ No cloud. No data sharing. No subscriptions. 100% private and free.
 
 > ⚙️ **Development Status:**  
 > The project is in active development.  
-> Current limitations include high VRAM usage, imperfect command parsing, and incomplete logging — all under active improvement.
+> Current limitations include pipeline speed (≈5 seconds per run) and imperfect command parsing — both actively being improved.
+
+
+> ✈️ **Designed for IFR and Area Control:**  
+> Supports key ATC commands parsed into JSON for logging, analysis, or simulator integration. Easily extendable to include additional commands.
+
 
 ---
 
 ## Features
-- **Offline operation:** all inference runs on your device.
-- **Voice I/O:** converts ATC audio to text and generates pilot speech responses.
-- **Structured reasoning:** ATC commands parsed into machine-readable JSON.
-- **Privacy-first:** nothing is sent to the cloud.
-- **Training tool:** ideal for ATC students and simulator developers.
+- **Fully offline operation:** all processing runs locally on your device, no internet required.
+- **Voice input/output:** transcribes ATC audio to text and generates realistic pilot speech responses.
+- **Structured reasoning:** ATC commands are parsed into machine-readable JSON for logging, analysis, or simulator integration.
+- **Privacy-first design:** no data is sent to the cloud, ensuring complete confidentiality.
+- **Supported ATC commands:**
+  - **Vectoring:** turn left/right, fly heading
+  - **Altitudes:** climb, descend, maintain flight level
+  - **Speeds:** reduce, increase, maintain
+  - **Clearances:** cleared for approach, cleared direct to fix
 
 ---
 ## 🎧 Audio Examples
