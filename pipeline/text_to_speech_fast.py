@@ -46,7 +46,7 @@ class MMSTTS:
 
         return waveform_fast
 
-    def synthesize(self, text: str, speed_factor: float = 1.0):
+    def synthesize(self, text: str, description: str):
         """Generate waveform from text with timing."""
         start_time = time.time()
 

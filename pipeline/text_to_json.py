@@ -1,4 +1,3 @@
-# atc_llm.py
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import json
@@ -7,18 +6,14 @@ import logging
 import re
 import time
 
-class ATCAssistantLLM:
-    """
-    LLM wrapper for ATC tasks:
-    - Converting ATC messages to structured JSON commands.
-    - Generating pilot response text.
-    """
+class ATCTextToJSONLLM:
+    """LLM-based ATC text-to-JSON generator."""
     def __init__(self, logger, model_name="google/gemma-3-4b-it", device="cuda"):
         self.logger = logger
         self.device = device
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
-        self.logger.info(f"[Generate-JSON] Init Ok! Device: {self.device}")
+        self.logger.info(f"[ATCTextToJSONLLM] Init Ok! Device: {self.device}")
 
     def generate_json(self, atc_text, json_path=None, max_new_tokens=128):
         """
@@ -114,7 +109,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("Generate-JSON-Test")
 
     # Initialize LLM assistant
-    llm = ATCAssistantLLM(logger)
+    llm = ATCTextToJSONLLM(logger)
 
     # Generate JSON from text command
     command_json = llm.generate_json(atc_command)

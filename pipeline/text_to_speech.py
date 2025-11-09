@@ -2,6 +2,7 @@
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from scipy.signal import resample
 from snac import SNAC
 import soundfile as sf
 import numpy as np
@@ -91,15 +92,19 @@ def unpack_snac_from_7(snac_tokens: list) -> list:
 
 
 class PilotTTS:
+    # 1. Make sure git‑lfs is installed: git lfs install
+    # 2. Clone the repository: git clone https://huggingface.co/maya-research/maya1
+
     """TTS using Maya1 and SNAC decoder."""
-    def __init__(self, device, logger):
+    def __init__(self, device, logger, speed_factor=1.05):
         self.device = device
         self.logger = logger
+        self.speed_factor = speed_factor
 
         self.logger.info(f"[PilotTTS] loading model...")
         self.model = AutoModelForCausalLM.from_pretrained(
                         "maya-research/maya1", 
-                        dtype=torch.bfloat16, 
+                        #dtype=torch.bfloat16, 
                         device_map=device,
                         trust_remote_code=True
                     )
@@ -165,6 +170,10 @@ class PilotTTS:
         # Trim warmup samples (first 2048 samples) and move to cpu
         audio = audio[2048:] if audio.numel() > 2048 else audio
         audio = audio.detach().cpu().numpy().astype(np.float32)
+
+        # Apply speed adjustment
+        if self.speed_factor != 1.0:
+            audio = self._adjust_speed(audio)
         
         # Print length of generated audio
         duration_sec = len(audio) / 24000
@@ -174,6 +183,24 @@ class PilotTTS:
         return audio
 
 
+    def _adjust_speed(self, waveform: np.ndarray) -> np.ndarray:
+        """Adjust playback speed (resample, pitch not preserved)."""
+        if self.speed_factor <= 0:
+            raise ValueError("Speed factor must be > 0")
+
+        sr = 24000  # Maya1 uses 24kHz
+        original_len_s = len(waveform) / sr
+
+        num_samples = int(len(waveform) / self.speed_factor)
+        waveform_fast = resample(waveform, num_samples)
+
+        new_len_s = len(waveform_fast) / sr
+        self.logger.info(
+            f"[PilotTTS] Applied speed factor '{self.speed_factor:.2f}' — duration {original_len_s:.2f}s → {new_len_s:.2f}s"
+        )
+
+        return waveform_fast
+    
     def save(self, audio, save_path):
         # Get directory from save path
         directory = os.path.dirname(save_path)
@@ -194,9 +221,9 @@ if __name__ == "__main__":
     device="cuda"
 
     # Example accent styles
-    description_atc = "Midwest woman. Normal pitch, warm timbre, fast quick hurry pacing."
+    #description_atc = "Midwest woman. Normal pitch, warm timbre, fast quick hurry pacing."
     #description_uk = "Realistic male voice in the 40s age with british accent. Normal pitch, warm timbre, fast pacing."
-    #description_us = "Realistic male voice in the 60s age with american accent. Normal pitch, warm timbre, fast pacing."
+    description_us = "Realistic male voice in the 60s age with american accent. Normal pitch, warm timbre, fast pacing."
 
     # Example text to speak
     text_atc = "Finnair five five two papa, turn left heading two seven zero, descend to flight level two eight zero."
@@ -221,7 +248,7 @@ if __name__ == "__main__":
     tts = PilotTTS(device, logger)
 
     # Convert text-to-speech
-    pilot_speech = tts.synthesize(text_atc, description_atc)
+    pilot_speech = tts.synthesize(text_atc, description_us)
 
     # Save audio
     tts.save(pilot_speech, save_path)

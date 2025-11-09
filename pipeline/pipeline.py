@@ -1,5 +1,6 @@
 from speech_to_text import WhisperASR
-from text_to_json import ATCAssistantLLM
+from text_to_json import ATCTextToJSONLLM
+from text_to_json_fast import ATCTextToJSONRegex
 from text_to_speech import PilotTTS
 from text_to_speech_fast import MMSTTS
 from json_to_pilot_reply import ATCJsonConverter
@@ -39,13 +40,16 @@ class pipeline:
                               logger=self.logger
                               )
         
-        # 2. Language model (LLM) for text-to-JSON conversion
-        #    Converts ATC text commands into structured JSON instructions
-        self.llm = ATCAssistantLLM(model_name="google/gemma-3-4b-it",
-                                   device=device,
-                                   logger=self.logger
-                                   )
-        
+        # 2. ATC Text → JSON Parser
+        #    Extracts structured ATC instructions (heading, altitude, QNH, etc.) from text.
+        #    Option A: ATCTextToJSONLLM – LLM-based parser (accurate, but slow)
+        #    Option B: ATCTextToJSONRegex – regex-based parser (very fast, but brittle)
+        #self.parser = ATCTextToJSONLLM(model_name="google/gemma-3-4b-it",
+        #                               device=device,
+        #                               logger=self.logger
+        #                               )
+        self.parser = ATCTextToJSONRegex(logger=self.logger)
+
         # 3. JSON-to-Pilot response converter
         #    Generates ICAO-style pilot readback from structured ATC JSON
         self.json_to_pilot = ATCJsonConverter(logger=self.logger)
@@ -68,12 +72,14 @@ class pipeline:
 
         # 1. ATC audio → text
         atc_text = self.asr.transcribe(audio_input)
+        print(f"ATC command: {atc_text}")
 
         # 2. ATC text → structured command JSON
-        command_json = self.llm.generate_json(atc_text, json_path)
+        command_json = self.parser.generate_json(atc_text, json_path)
 
         # 3. Command JSON → pilot response text
         pilot_text = self.json_to_pilot.generate_pilot_readback(command_json)
+        print(f"Pilot answer: {pilot_text}")
 
         # 4. Pilot response to audio
         description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
