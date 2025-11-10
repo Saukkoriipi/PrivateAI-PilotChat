@@ -5,7 +5,6 @@ import numpy as np
 import scipy.io.wavfile
 from transformers import VitsModel, AutoTokenizer
 from scipy.signal import resample
-from IPython.display import Audio
 
 
 class MMSTTS:
