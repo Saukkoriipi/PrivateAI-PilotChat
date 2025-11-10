@@ -20,11 +20,15 @@ Tested and safe components only.
 
 **Input Audio:**
 
-[Listen](demo/input/atc1.mp3)
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc1.mp3" type="audio/mpeg">
+</audio>
 
 **Pilot Response:**
 
-[Listen](demo/output/atc1.mp3)
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc1.mp3" type="audio/mpeg">
+</audio>
 
 ---
 
@@ -35,11 +39,15 @@ Tested and safe components only.
 
 **Input Audio:**
 
-[Listen](demo/input/atc2.mp3)
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc2.mp3" type="audio/mpeg">
+</audio>
 
 **Pilot Response:**
 
-[Listen](demo/output/atc2.mp3)
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc2.mp3" type="audio/mpeg">
+</audio>
 
 ---
 
@@ -50,23 +58,15 @@ Tested and safe components only.
 
 **Input Audio:**
 
-[Listen](demo/input/atc3.mp3)
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc3.mp3" type="audio/mpeg">
+</audio>
 
 **Pilot Response:**
 
-[Listen](demo/output/atc3.mp3)
-
-
----
-
-## Notes
-* The **ICAO recommends** a radiotelephony rate of **≤100 words per minute** to ensure clarity. Speaking faster may increase recognition errors in the system.
-* Only **predefined airlines** are recognized. The list is located at `pipeline/airlines.csv`. You can **edit this file** to add or remove recognizable callsigns.
-* The **simulator expects callsigns** to start with letters and end with numbers. For example, `AAL102` is valid, but `DLH5PP` is not.
-* In testing, the system is mostly robust. **Most common errors occur in the callsign**. For this reason, `pipeline/airlines.csv` allows users to add **more than one acceptable pronunciation per airline**.
-* To **further improve the pipeline**, focus on **audio-to-parsed command translation**. Precomputing pronunciation options for standard phraseology can make runtime matching more robust with minimal overhead. LLM-based approaches (we tested this) also work but are too slow for fully real-time, local use. Conversion from parsed command → text → audio is relatively trivial task.
-* Future plan: integrate **ATC-Pilot Chat** into **Bluesky ATC Simulator** ([PyPI link](https://pypi.org/project/bluesky-simulator/)) for a fully voice-driven ATC simulation experience.
-
+<audio controls>
+  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc3.mp3" type="audio/mpeg">
+</audio>
 
 ---
 
@@ -174,14 +174,15 @@ pipeline/
  └── text_to_speech_fast.py   # Fast pilot TTS (single voice)
 ```
 
-
 ---
 
-## Extensibility
-
-* Swap ASR or TTS engines
-* Add custom JSON fields or new commands
-* Integrate with flight simulators
+## Notes
+* The **ICAO recommends** a radiotelephony rate of **≤100 words per minute** to ensure clarity. Speaking faster may increase recognition errors in the system.
+* Only **predefined airlines** are recognized. The list is located at `pipeline/airlines.csv`. You can **edit this file** to add or remove recognizable callsigns.
+* The **simulator expects callsigns** to start with letters and end with numbers. For example, `AAL102` is valid, but `DLH5PP` is not.
+* In testing, the system is mostly robust. **Most common errors occur in the callsign**. For this reason, `pipeline/airlines.csv` allows users to add **more than one acceptable pronunciation per airline**.
+* To **further improve the pipeline**, focus on **audio-to-parsed command translation**. Precomputing pronunciation options for standard phraseology can make runtime matching more robust with minimal overhead. LLM-based approaches (we tested this) also work but are too slow for fully real-time, local use. Conversion from parsed command → text → audio is relatively trivial task.
+* Future plan: integrate **ATC-Pilot Chat** into **Bluesky ATC Simulator** ([PyPI link](https://pypi.org/project/bluesky-simulator/)) for a fully voice-driven ATC simulation experience.
 
 ---
 
