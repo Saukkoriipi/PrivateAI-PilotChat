@@ -6,4 +6,3 @@ pandas
 scipy
 snac
 sounddevice
-pyaudio

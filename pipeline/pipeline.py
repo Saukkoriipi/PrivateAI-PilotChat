@@ -91,7 +91,8 @@ class pipeline:
         self.csv_logger.append(atc_text, command_json)
 
         # 6. Log total time
-        self.logger.info(f"[pipeline.run] Finished processing in '{(time.time() - start_time):.2f}' seconds")
+        self.logger.info(f"[pipeline.run] Processing ready. Run time: '{(time.time() - start_time):.2f}' seconds")
+        print(f"[pipeline.run] Processing ready. Run time: '{(time.time() - start_time):.2f}' seconds")
 
         return pilot_speech, samplerate
 
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     # Define params
     results_folder = "demo/output"
     input_folder = "demo/input"
-    device = "cuda"
+    device = "cpu"
 
     # Initialize pipeline
     pipeline = pipeline(results_folder, device)

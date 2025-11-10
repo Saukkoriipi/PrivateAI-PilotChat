@@ -41,10 +41,14 @@ class ASR:
         # Prepare input for Whisper
         inputs = self.processor(audio, sampling_rate=16000, return_tensors="pt")
         input_features = inputs.input_features.to(self.device)
+    
+        # Create attention mask of ones (full valid input)
+        attention_mask = torch.ones_like(input_features, dtype=torch.long).to(self.device)
 
         # Generate transcription
         predicted_ids = self.model.generate(
             input_features,
+            attention_mask=attention_mask,
             language="en",
             task="transcribe",
             max_new_tokens=256
@@ -57,7 +61,7 @@ class ASR:
         # Print results
         elapsed = time.time() - start_time
         self.logger.info(f"[ASR] Transcription result '({elapsed:.2f}s)': '{transcription}'")
-        print(f"[ASR] Pilot command: '({elapsed:.2f}s)': '{transcription}'")
+        print(f"[ASR] Pilot command: '{transcription}'")
 
         return transcription
 

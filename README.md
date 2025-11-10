@@ -101,6 +101,34 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 
 ---
 
+## Usage
+
+* Speak your ATC instruction into the microphone.
+* The system will:
+
+  1. Transcribe your audio into text
+  2. Parse the text into structured ATC JSON commands
+  3. Generate ICAO-style pilot readback text
+  4. Convert the text to synthetic pilot audio
+  5. Play the pilot audio
+  6. Log commands in both JSON and CSV formats
+
+---
+
+## Supported ATC Commands
+
+| Type              | Example                               |
+| ----------------- | ------------------------------------- |
+| Vectoring         | TURN LEFT HEADING 270                 |
+| Altitudes         | CLIMB TO FL280 / DESCEND TO 4000 FEET |
+| QNH / Altimeter   | QNH 1013                              |
+| Speed             | REDUCE SPEED TO 210 KNOTS             |
+| Clearance         | CLEARED DIRECT LAKUT                  |
+| Approach / Runway | CLEARED ILS APPROACH RUNWAY 22        |
+
+
+---
+
 ## Hardware & System Requirements
 
 * Works on **GPU and CPU**. GPU is optional but speeds up processing.
@@ -136,8 +164,7 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 
    ```bash
    python3 -m venv venv
-   source venv/bin/activate   # Linux/macOS
-   venv\Scripts\activate      # Windows
+   source venv/bin/activate 
    ```
 
 3. **Install dependencies**
@@ -151,34 +178,6 @@ All processing — speech recognition, command parsing, and voice synthesis — 
    ```bash
    python3 chat.py
    ```
-
----
-
-## Usage
-
-* Speak your ATC instruction into the microphone.
-* The system will:
-
-  1. Transcribe your audio into text
-  2. Parse the text into structured ATC JSON commands
-  3. Generate ICAO-style pilot readback text
-  4. Convert the text to synthetic pilot audio
-  5. Play the pilot audio
-  6. Log commands in both JSON and CSV formats
-
----
-
-## Supported ATC Commands
-
-| Type              | Example                               |
-| ----------------- | ------------------------------------- |
-| Vectoring         | TURN LEFT HEADING 270                 |
-| Altitudes         | CLIMB TO FL280 / DESCEND TO 4000 FEET |
-| QNH / Altimeter   | QNH 1013                              |
-| Speed             | REDUCE SPEED TO 210 KNOTS             |
-| Clearance         | CLEARED DIRECT LAKUT                  |
-| Approach / Runway | CLEARED ILS APPROACH RUNWAY 22        |
-
 
 ---
 
