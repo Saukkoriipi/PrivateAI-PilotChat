@@ -1,8 +1,11 @@
 {
-    "icao": "BAW",
-    "callsign": "SPEEDBIRD327",
-    "turn_direction": "left",
-    "heading": 270,
+    "icao": "DAL",
+    "callsign": "DELTA209",
+    "turn_direction": "right",
+    "heading": 180,
     "vertical_movement": "descent",
-    "to_altitude": "FL280"
+    "to_altitude": "4000ft",
+    "speed_movement": "reduce",
+    "speed": "210kts",
+    "qnh": "998"
 }

@@ -2,52 +2,73 @@
 
 ![PrivateAI-PilotChat](img.png)
 
-**PrivateAI-PilotChat** is an open-source, fully offline real-time ATC–pilot voice communication simulator.
-It allows you to practice realistic air traffic control phraseology and pilot exchanges entirely on your local system.
+**PrivateAI-PilotChat** is an open-source, fully offline, real-time ATC–pilot voice communication simulator. It lets you practice realistic air traffic control phraseology, pronunciation, and exchanges with a virtual pilot entirely on your local system.
 
-All processing — speech recognition, command interpretation, and voice synthesis — happens locally:
-No cloud. No data sharing. No subscriptions. 100% private and free.
-Tested and safe components only.
+All processing — speech recognition, command parsing, and voice synthesis — happens locally. No cloud. No data sharing. No subscriptions. 100% private, free, and built with tested, safe components.
+
+**Best part:** A normal home laptop is enough to run it in real time.
 
 ---
 
 ## Audio Examples
 
-### Example 1 — British Airways
-
-**ATC Command:**  
-`BAW327 turn left heading 270 descend to flight level 280`
-
-**Input Audio:**
-
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc1.mp3" type="audio/mpeg">
-</audio>
-
-**Pilot Response:**
-
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc1.mp3" type="audio/mpeg">
-</audio>
-
----
-
-### Example 2 — Delta Airlines
+### Example 1 — Delta Airlines
 
 **ATC Command:**  
 `DAL209 turn right heading 180 descend to 4000 feet qnh 998 reduce speed to 210 knots`
 
 **Input Audio:**
 
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc2.mp3" type="audio/mpeg">
-</audio>
+[Listen](https://drive.google.com/file/d/10VbqSBkJ-lZTmbGGOSGiS9UfzBnmQ9d9/view?usp=drive_link)
 
 **Pilot Response:**
 
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc2.mp3" type="audio/mpeg">
-</audio>
+[Listen](https://drive.google.com/file/d/10QAltXYhR5v1iX8evDpDaxGLAgBfaSgY/view?usp=drive_link)
+
+**Command as JSON (auto-parsed from ATC input audio):**
+
+```json
+{
+  "icao": "DAL209",
+  "callsign": "DELTA209",
+  "turn_direction": "right",
+  "heading": 180,
+  "vertical_movement": "descent",
+  "to_altitude": "4000ft",
+  "speed_movement": "reduce",
+  "speed": "210kts",
+  "qnh": "998"
+}
+```
+
+---
+
+### Example 2 — British Airways
+
+**ATC Command:**  
+`BAW327 turn left heading 270 descend to flight level 280`
+
+**Input Audio:**
+
+[Listen](https://drive.google.com/file/d/1VYb6P2VGolAAl2r_xW2yQiAihcrEgbY_/view?usp=drive_link)
+
+**Pilot Response:**
+
+[Listen](https://drive.google.com/file/d/1RgVe5ugu3uSvGjjcMisQr9_khSHtiX80/view?usp=drive_link)
+
+
+**Command as JSON (auto-parsed from ATC input audio):**
+
+```json
+{
+  "icao": "BAW327",
+  "callsign": "SPEEDBIRD327",
+  "turn_direction": "left",
+  "heading": 270,
+  "vertical_movement": "descent",
+  "to_altitude": "FL280"
+}
+```
 
 ---
 
@@ -58,15 +79,25 @@ Tested and safe components only.
 
 **Input Audio:**
 
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/input/atc3.mp3" type="audio/mpeg">
-</audio>
+[Listen](https://drive.google.com/file/d/1Pv_BKutIgZseeS8AXTAhkxF0PGs5qn4E/view?usp=drive_link)
 
 **Pilot Response:**
 
-<audio controls>
-  <source src="https://raw.githubusercontent.com/Saukkoriipi/PrivateAI-PilotChat/main/demo/output/atc3.mp3" type="audio/mpeg">
-</audio>
+[Listen](https://drive.google.com/file/d/1hQkJaA6s2mW_fS4irdaBUbb455Djd-Oz/view?usp=drive_link)
+
+
+**Command as JSON (auto-parsed from ATC input audio):**
+
+```json
+{
+    "icao": "FIN522",
+    "callsign": "FINNAIR522",
+    "turn_direction": "left",
+    "heading": 250,
+    "vertical_movement": "descent",
+    "to_altitude": "FL360"
+}
+```
 
 ---
 
