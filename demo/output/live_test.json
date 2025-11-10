@@ -1,5 +1,6 @@
 {
-    "icao": "SAS456",
-    "callsign": "SCANDINAVIAN456",
-    "qnh": "1013"
+    "icao": "DLH5",
+    "callsign": "LUFTHANSA5",
+    "vertical_movement": "climb",
+    "to_altitude": "FL330"
 }

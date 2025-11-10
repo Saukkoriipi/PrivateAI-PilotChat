@@ -76,7 +76,6 @@ class pipeline:
 
         # 3. Command JSON → pilot response text
         pilot_text = self.json_to_pilot.generate_pilot_readback(command_json)
-        print(f"Pilot answer: {pilot_text}")
 
         # 4. Pilot response to audio
         description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
