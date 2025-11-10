@@ -1,120 +1,149 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+import re
+import logging
+import time
 import json
 import os
-import logging
-import re
-import time
+from airline_matcher import AirlineMatcher
 
-class ATCTextToJSONLLM:
-    """LLM-based ATC text-to-JSON generator."""
-    def __init__(self, logger, model_name="google/gemma-3-4b-it", device="cuda"):
-        self.logger = logger
-        self.device = device
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name).to(self.device)
-        self.logger.info(f"[ATCTextToJSONLLM] Init Ok! Device: {self.device}")
-
-    def generate_json(self, atc_text, json_path=None, max_new_tokens=128):
-        """
-        Convert ATC command to structured JSON
-        """
-
-        start_time = time.time()
-
-        # Define prompts
-        system_prompt = """
-        You are an ATC (Air Traffic Control) parser. The text provided is an ATC controller-to-pilot message. 
-        The text may contain spelling and grammar mistakes, which you need to correct. 
-        Convert the message into a structured JSON format without including any explanations. 
-
-        Follow these rules:
-        - The 'icao_callsign' and 'callsign' are REQUIRED. If the callsign contains spelling mistakes, select the closest possible ICAO callsign.
-        - Optional fields include: 'heading', 'turn_direction', 'to_altitude', 'rate_of_climb', 'vertical_movement', 'speed', 'speed_movement'.
-        - 'vertical_movement' must be either 'climb' or 'descent' if indicated in the text.
-        - If a turn is mentioned, 'turn_direction' must be either 'left' or 'right'.
-        - If a speed change is mentioned, include 'speed' (numeric value with units) and 'speed_movement' ('increase' or 'reduce').
-        - Return ONLY valid JSON. Do not add any extra text or commentary.
-
-        Example:
-        Text: ***Finnair522 turn left heading 250 descent to 3000 feet reduce speed to 220 knots***
-        JSON:
-        {
-        "callsign": "Finnair522",
-        "turn_direction": "left",
-        "heading": 250,
-        "to_altitude": "3000ft",
-        "vertical_movement": "descent",
-        "speed": "220kts",
-        "speed_movement": "reduce"
-        }
-        """
-        self.logger.info(f"[Generate-JSON] Input text: '{atc_text}'")
-
-        user_prompt = f"Convert the following ATC message to JSON: {atc_text}"
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
-
-        # Tokenize
-        inputs = self.tokenizer.apply_chat_template(
-            messages,
-            add_generation_prompt=True,
-            tokenize=True,
-            return_dict=True,
-            return_tensors="pt",
-        ).to(self.model.device)
-
-        # Convert to JSON
-        outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
-        generated_text = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:])
-
-        # Clean output
-        match = re.search(r"\{.*\}", generated_text, re.DOTALL)
-        if match:
-            json_text = match.group(0)
-            try:
-                parsed = json.loads(json_text)
-            except json.JSONDecodeError:
-                parsed = json_text
+class ATCTextToJSON:
+    """Lightweight regex-based ATC text-to-JSON parser."""
+    
+    def __init__(self, logger: logging.Logger = None, airlines_csv: str = "pipeline/airlines.csv"):
+        if logger is None:
+            logging.basicConfig(level=logging.INFO)
+            self.logger = logging.getLogger("ATCTextToJSON")
         else:
-            parsed = generated_text
+            self.logger = logger
+        self.logger.info("[ATCTextToJSONRegex] Init Ok!")
+
+        # --- Initialize airline matcher ---
+        if not os.path.isfile(airlines_csv):
+            raise FileNotFoundError(f"Airlines CSV not found: {airlines_csv}")
+        self.airline_matcher = AirlineMatcher(csv_path=airlines_csv, logger=self.logger)
+        self.logger.info("[ATCTextToJSONRegex] Airline matcher initialized")
+
+
+    def generate_json(self, text: str, json_path: str = None) -> dict:
+        """
+        Parse ATC instruction text into structured JSON using regex rules.
+
+        Example input:
+            'DELTA 209 TURN RIGHT HEADING 180 DESCEND TO 4000 FEET QNH 9 OR 9 OR 8 REDUCE SPEED TO 210 KNOTS'
+
+        Example output:
+            {
+                "callsign": "DELTA209",
+                "turn_direction": "right",
+                "heading": 180,
+                "vertical_movement": "descent",
+                "to_altitude": "4000ft",
+                "speed_movement": "reduce",
+                "speed": "210kts",
+                "qnh": "998",
+                "cleared_direct": "LAKUT",
+                "approach": "ILS",
+                "runway": "22"
+            }
+        """
+        start_time = time.time()
+        text = text.upper() # Convert to uppercase once       
+        result = {}
+
+        # Remove spurious "OR" tokens and normalize whitespace
+        # Speech to text commonly translated 9 "niner" as "9 or"
+        text = re.sub(r"\bOR\b", "", text)
+        # Replace multiple spaces with one and remove leading/trailing spaces
+        text = re.sub(r'\s+', ' ', text).strip() 
+        # Remove spaces **between digits**
+        text = re.sub(r'(?<=\d)\s+(?=\d)', '', text) # 9 9 9 -> 999
+
+        # --- Callsign ---
+        m = re.match(r"([A-Z]+)\s?(\d+)", text)
+        if m:
+            callsign = f"{m.group(1).capitalize()}{m.group(2)}"
+            result["icao"], result["callsign"] = self.airline_matcher.match_CALLSIGN(callsign)
+
+        # --- Turn direction and heading ---
+        m = re.search(r"TURN\s+(LEFT|RIGHT)", text)
+        if m:
+            result["turn_direction"] = m.group(1).lower()
+
+        m = re.search(r"HEADING\s+(\d{2,3})", text)
+        if m:
+            result["heading"] = int(m.group(1))
+
+        # --- Vertical movement ---
+        if re.search(r"CLIMB", text):
+            result["vertical_movement"] = "climb"
+        elif re.search(r"DESCEND|DECENT", text):
+            result["vertical_movement"] = "descent"
+
+        # --- Altitude ---
+        m = re.search(r"(FLIGHT LEVEL|FL)\s?(\d{2,3})", text)
+        if m:
+            result["to_altitude"] = f"FL{m.group(2)}"
+        else:
+            m = re.search(r"(\d{3,5})\s*(FEET|FT)", text)
+            if m:
+                result["to_altitude"] = f"{m.group(1)}ft"
+
+        # --- Speed ---
+        if re.search(r"REDUCE\s+SPEED", text):
+            result["speed_movement"] = "reduce"
+        elif re.search(r"INCREASE\s+SPEED", text):
+            result["speed_movement"] = "increase"
+
+        m = re.search(r"SPEED\s+(?:TO\s+)?(\d{2,3})", text)
+        if m:
+            result["speed"] = f"{m.group(1)}kts"
+
+        # --- QNH ---
+        m = re.search(r"QNH\s*(\d{3,4})", text)
+        if m:
+            result["qnh"] = m.group(1)
+
+        # --- Cleared direct fix ---
+        m = re.search(r"CLEARED\s+DIRECT\s+([A-Z]{3,6})", text)
+        if m:
+            result["cleared_direct"] = m.group(1)
+
+        # --- Approach and runway ---
+        m = re.search(r"CLEARED\s+(ILS|VOR|RNAV)\s+APPROACH\s+(?:RWY|RUNWAY)?\s*(\d{2})", text)
+        if m:
+            result["approach"] = m.group(1)
+            result["runway"] = m.group(2)
+        else:
+            # Simple runway only case (e.g., CLEARED APPROACH RWY 22)
+            m = re.search(r"CLEARED\s+APPROACH\s+(?:RWY|RUNWAY)?\s*(\d{2})", text)
+            if m:
+                result["approach"] = "APPROACH"
+                result["runway"] = m.group(1)
 
         # Save JSON for later use
         if json_path is not None:
             os.makedirs(os.path.dirname(json_path), exist_ok=True)
             with open(json_path, "w") as f:
-                json.dump(parsed, f, indent=4)
+                json.dump(result, f, indent=4)
             self.logger.info(f"[Generate-JSON] JSON saved to {json_path}")
 
         # Log result JSON and elapsed time
         elapsed = time.time() - start_time
-        self.logger.info(f"[Generate-JSON] Generated JSON '({elapsed:.2f}s)': {json.dumps(parsed, indent=4, ensure_ascii=False)}")
+        self.logger.info(f"[Generate-JSON] Generated JSON '({elapsed:.2f}s)': {json.dumps(result, indent=4, ensure_ascii=False)}")
 
-        return parsed
+        self.logger.info(f"[Text→JSON] Parsed: {result}")
+        return result
 
 
 if __name__ == "__main__":
-    # Manual test: run with `python3 pipeline/llm.py`
-    atc_command = "DLH5 Climb and maintain FL350, heading 270"
-
-    # Init logger
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        filename="demo/output/llm.log"
-    )
-    logger = logging.getLogger("Generate-JSON-Test")
-
-    # Initialize LLM assistant
-    llm = ATCTextToJSONLLM(logger)
-
-    # Generate JSON from text command
-    command_json = llm.generate_json(atc_command)
-
-    # Pretty-print JSON
-    print(f"\nATC command: {atc_command}")
-    print("Generated JSON:")
-    print(json.dumps(command_json, indent=4))
+    parser = ATCTextToJSONRegex()
+    tests = [
+        "DELTA 209 TURN RIGHT HEADING 180 DESCEND TO 4000 FEET QNH 9 OR 9 OR 8 REDUCE SPEED TO 210 KNOTS",
+        "FINNAIR 522 TURN LEFT HEADING 250 DESCENT TO FLIGHT LEVEL 360",
+        "RYANAIR 12 CLIMB TO FLIGHT LEVEL 200 QNH 1013",
+        "FINNAIR 350 CLEARED DIRECT LAKUT",
+        "SCANDINAVIAN 421 CLEARED ILS APPROACH RWY 22"
+    ]
+    for t in tests:
+        print("* " * 10)
+        print(f"\nCommand: {t}")
+        print("Parsed JSON:", parser.generate_json(t))
