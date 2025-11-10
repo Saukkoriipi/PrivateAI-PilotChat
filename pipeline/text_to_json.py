@@ -153,10 +153,15 @@ class ATCTextToJSON:
             result["speed"] = f"{m.group(1)}kts"
 
         # --- QNH / altimeter ---
-        # Accept minor mishears and optional space between token and number
-        m = re.search(r"\bQ[NMB]H?\s*(\d{3,4})\b", text)
+        # Accept common mishears like QNH, QMH, QNB, QNS and optional space before number
+        m = re.search(r"\bQ(?:N[HMSB]?|M[HNSB]?)\s*(\d{3,4})\b", text)
         if m:
-            result["qnh"] = m.group(1)
+            qnh_val = m.group(1)
+            # Ensure QNH is within realistic atmospheric range
+            if 800 <= int(qnh_val) <= 1200:
+                result["qnh"] = qnh_val
+            else:
+                result["qnh"] = "SAY AGAIN QNH"
 
         # --- Cleared direct fix ---
         m = re.search(r"CLEARED\s+DIRECT\s+([A-Z]{3,6})", text)
