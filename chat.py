@@ -66,6 +66,8 @@ class ATCtoPilotChat:
                     self.logger.info("Exiting ATC-to-Pilot Chat.")
                     break
 
+                print("\n🎙️ Listening... Give your ATC command.")
+
                 # Record audio manually
                 atc_command = self.record_audio_manual()
 

@@ -72,7 +72,7 @@ class AirlineMatcher:
             )
         ].iloc[0]
 
-        icao = row['ICAO']
+        icao = row['ICAO'] + numbers_part  # append numeric suffix
         CALLSIGN = row['CALLSIGN'] + numbers_part  # append numeric suffix
         self.logger.info(f"[AirlineMatcher] Input '{text_CALLSIGN}' matched to '{CALLSIGN}' ({icao})")
         return icao, CALLSIGN

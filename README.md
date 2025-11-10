@@ -136,18 +136,11 @@ pipeline/
 `BAW327 turn left heading 270 descend to flight level 280`
 
 **Input Audio:**
-
-<audio controls>
-  <source src="demo/input/atc1.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/input/atc1.wav)
 
 **Pilot Response:**
 
-<audio controls>
-  <source src="demo/output/atc1.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/output/atc1.wav)
 
 ---
 
@@ -158,17 +151,11 @@ pipeline/
 
 **Input Audio:**
 
-<audio controls>
-  <source src="demo/input/atc2.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/input/atc2.wav)
 
 **Pilot Response:**
 
-<audio controls>
-  <source src="demo/output/atc2.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/output/atc2.wav)
 
 ### Example 3 — Finnair
 
@@ -177,17 +164,11 @@ pipeline/
 
 **Input Audio:**
 
-<audio controls>
-  <source src="demo/input/atc3.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/input/atc3.wav)
 
 **Pilot Response:**
 
-<audio controls>
-  <source src="demo/output/atc3.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+[Listen](demo/output/atc3.wav)
 
 ---
 
