@@ -11,6 +11,54 @@ Tested and safe components only.
 
 ---
 
+## Audio Examples
+
+### Example 1 — British Airways
+
+**ATC Command:**  
+`BAW327 turn left heading 270 descend to flight level 280`
+
+**Input Audio:**
+
+[Listen](demo/input/atc1.mp3)
+
+**Pilot Response:**
+
+[Listen](demo/output/atc1.mp3)
+
+---
+
+### Example 2 — Delta Airlines
+
+**ATC Command:**  
+`DAL209 turn right heading 180 descend to 4000 feet qnh 998 reduce speed to 210 knots`
+
+**Input Audio:**
+
+[Listen](demo/input/atc2.mp3)
+
+**Pilot Response:**
+
+[Listen](demo/output/atc2.mp3)
+
+---
+
+### Example 3 — Finnair
+
+**ATC Command:**  
+`FIN522 turn left heading 250 descent to flight level 360`
+
+**Input Audio:**
+
+[Listen](demo/input/atc3.mp3)
+
+**Pilot Response:**
+
+[Listen](demo/output/atc3.mp3)
+
+
+---
+
 ## Notes
 * The **ICAO recommends** a radiotelephony rate of **≤100 words per minute** to ensure clarity. Speaking faster may increase recognition errors in the system.
 * Only **predefined airlines** are recognized. The list is located at `pipeline/airlines.csv`. You can **edit this file** to add or remove recognizable callsigns.
@@ -126,49 +174,6 @@ pipeline/
  └── text_to_speech_fast.py   # Fast pilot TTS (single voice)
 ```
 
----
-
-## Audio Examples
-
-### Example 1 — British Airways
-
-**ATC Command:**  
-`BAW327 turn left heading 270 descend to flight level 280`
-
-**Input Audio:**
-[Listen](demo/input/atc1.wav)
-
-**Pilot Response:**
-
-[Listen](demo/output/atc1.wav)
-
----
-
-### Example 2 — Delta Airlines
-
-**ATC Command:**  
-`DAL209 turn right heading 180 descend to 4000 feet qnh 998 reduce speed to 210 knots`
-
-**Input Audio:**
-
-[Listen](demo/input/atc2.wav)
-
-**Pilot Response:**
-
-[Listen](demo/output/atc2.wav)
-
-### Example 3 — Finnair
-
-**ATC Command:**  
-`FIN522 turn left heading 250 descent to flight level 360`
-
-**Input Audio:**
-
-[Listen](demo/input/atc3.wav)
-
-**Pilot Response:**
-
-[Listen](demo/output/atc3.wav)
 
 ---
 
