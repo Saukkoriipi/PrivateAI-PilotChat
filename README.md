@@ -19,11 +19,11 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 
 **Input Audio:**
 
-[Listen](https://drive.google.com/file/d/10VbqSBkJ-lZTmbGGOSGiS9UfzBnmQ9d9/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/10VbqSBkJ-lZTmbGGOSGiS9UfzBnmQ9d9/view?usp=drive_link)
 
 **Pilot Response:**
 
-[Listen](https://drive.google.com/file/d/10QAltXYhR5v1iX8evDpDaxGLAgBfaSgY/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/10QAltXYhR5v1iX8evDpDaxGLAgBfaSgY/view?usp=drive_link)
 
 **Command as JSON (auto-parsed from ATC input audio):**
 
@@ -50,11 +50,11 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 
 **Input Audio:**
 
-[Listen](https://drive.google.com/file/d/1VYb6P2VGolAAl2r_xW2yQiAihcrEgbY_/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/1VYb6P2VGolAAl2r_xW2yQiAihcrEgbY_/view?usp=drive_link)
 
 **Pilot Response:**
 
-[Listen](https://drive.google.com/file/d/1RgVe5ugu3uSvGjjcMisQr9_khSHtiX80/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/1RgVe5ugu3uSvGjjcMisQr9_khSHtiX80/view?usp=drive_link)
 
 
 **Command as JSON (auto-parsed from ATC input audio):**
@@ -79,11 +79,11 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 
 **Input Audio:**
 
-[Listen](https://drive.google.com/file/d/1Pv_BKutIgZseeS8AXTAhkxF0PGs5qn4E/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/1Pv_BKutIgZseeS8AXTAhkxF0PGs5qn4E/view?usp=drive_link)
 
 **Pilot Response:**
 
-[Listen](https://drive.google.com/file/d/1hQkJaA6s2mW_fS4irdaBUbb455Djd-Oz/view?usp=drive_link)
+[Listen (opens in Google Drive)](https://drive.google.com/file/d/1hQkJaA6s2mW_fS4irdaBUbb455Djd-Oz/view?usp=drive_link)
 
 
 **Command as JSON (auto-parsed from ATC input audio):**
@@ -159,11 +159,12 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 * Speak your ATC instruction into the microphone.
 * The system will:
 
-  1. Transcribe your audio to text
-  2. Parse ATC commands into structured JSON
-  3. Generate ICAO-style pilot readback
-  4. Produce a synthetic pilot voice
-  5. Log commands as JSON and CSV formats
+  1. Transcribe your audio into text
+  2. Parse the text into structured ATC JSON commands
+  3. Generate ICAO-style pilot readback text
+  4. Convert the text to synthetic pilot audio
+  5. Play the pilot audio
+  6. Log commands in both JSON and CSV formats
 
 ---
 
@@ -176,17 +177,8 @@ All processing — speech recognition, command parsing, and voice synthesis — 
 | QNH / Altimeter   | QNH 1013                              |
 | Speed             | REDUCE SPEED TO 210 KNOTS             |
 | Clearance         | CLEARED DIRECT LAKUT                  |
-| Approach / Runway | ILS APPROACH RUNWAY 22                |
+| Approach / Runway | CLEARED ILS APPROACH RUNWAY 22        |
 
----
-
-## Features
-
-* Fully offline operation
-* Voice input/output
-* Structured reasoning (JSON output)
-* Multi-voice or fast single-voice TTS
-* Privacy-first design
 
 ---
 
