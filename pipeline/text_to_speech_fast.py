@@ -62,7 +62,9 @@ class MMSTTS:
         self.inference_time = time.time() - start_time
         self.logger.info(f"[Text-to-speech-fast] Audio generated '({self.inference_time:.2f}s)' for '{text}'")
 
-        return waveform
+        # Return both waveform and its sampling rate
+        samplerate = self.model.config.sampling_rate
+        return waveform, samplerate
 
     def save(self, waveform: np.ndarray, filename="output.wav"):
         """Save waveform to a WAV file."""

@@ -76,12 +76,13 @@ class pipeline:
 
         # 4. Pilot response to audio
         description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
-        pilot_speech = self.tts.synthesize(pilot_text, description)
+        pilot_speech, samplerate = self.tts.synthesize(pilot_text, description)
         self.tts.save(pilot_speech, audio_path)
         
         # Log total time
         self.logger.info(f"[pipeline.run] Finished processing in '{(time.time() - start_time):.2f}' seconds")
 
+        return pilot_speech, samplerate
 
 
 if __name__ == "__main__":

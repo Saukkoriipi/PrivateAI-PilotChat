@@ -5,12 +5,13 @@ import re
 
 class AirlineMatcher:
     """
-    Load known airlines (ICAO code + CALLSIGN) from CSV and always find the closest match for a given CALLSIGN.
+    Load known airlines (ICAO code + CALLSIGN + PRONOUNCIATION) from CSV
+    and always find the closest match for a given spoken CALLSIGN.
     """
     def __init__(self, csv_path: str = "airlines.csv", logger: logging.Logger = None):
         """
         Args:
-            csv_path (str): Path to CSV file containing 'ICAO' and 'CALLSIGN' columns.
+            csv_path (str): Path to CSV file containing 'ICAO', 'CALLSIGN', 'PRONOUNCIATION' columns.
             logger (logging.Logger, optional): Logger for debug/info messages.
         """
         if logger is None:
@@ -21,19 +22,29 @@ class AirlineMatcher:
         
         self.logger.info(f"[AirlineMatcher] Loading airline data from {csv_path}")
         self.airlines_df = pd.read_csv(csv_path, sep=";")
-        if not all(col in self.airlines_df.columns for col in ['ICAO', 'CALLSIGN']):
-            raise ValueError("CSV must contain 'ICAO' and 'CALLSIGN' columns.")
+        required_cols = ['ICAO', 'CALLSIGN', 'PRONOUNCIATION']
+        if not all(col in self.airlines_df.columns for col in required_cols):
+            raise ValueError(f"CSV must contain columns: {required_cols}")
         
-        self.CALLSIGNs = sorted(self.airlines_df['CALLSIGN'].tolist())
-        self.logger.info(f"[AirlineMatcher] Loaded {len(self.CALLSIGNs)} CALLSIGNs: {self.CALLSIGNs}")
+        # Build a list of all pronunciations for matching
+        self.pronunciations = []
+        for _, row in self.airlines_df.iterrows():
+            if pd.isna(row['PRONOUNCIATION']) or row['PRONOUNCIATION'].strip() == "":
+                self.pronunciations.append(row['CALLSIGN'].upper())
+            else:
+                # Split multiple pronunciations if comma-separated
+                pron_list = [p.strip().upper() for p in row['PRONOUNCIATION'].split(",")]
+                self.pronunciations.extend(pron_list)
+        self.pronunciations = sorted(set(self.pronunciations))
+        self.logger.info(f"[AirlineMatcher] Loaded {len(self.pronunciations)} pronunciations")
 
     def match_CALLSIGN(self, text_CALLSIGN: str):
         """
-        Always return the closest matching CALLSIGN from known airlines.
-        If numbers are at the end of the input, append them back to the matched CALLSIGN.
+        Return the closest matching CALLSIGN based on PRONOUNCIATION.
+        Appends trailing numeric suffix if present.
 
         Args:
-            text_CALLSIGN (str): CALLSIGN to match.
+            text_CALLSIGN (str): Spoken CALLSIGN to match.
 
         Returns:
             tuple: (ICAO code, official CALLSIGN with numeric suffix if present)
@@ -45,23 +56,32 @@ class AirlineMatcher:
         letters_part = m.group(1)
         numbers_part = m.group(2) if m else ""
 
-        # Find closest match for letters part
-        matches = get_close_matches(letters_part, self.CALLSIGNs, n=1)
+        # Match against PRONOUNCIATION column
+        matches = get_close_matches(letters_part, self.pronunciations, n=1)
         if matches:
-            best_match = matches[0]
+            best_pron = matches[0]
         else:
-            best_match = sorted(self.CALLSIGNs)[0]
+            best_pron = sorted(self.pronunciations)[0]
 
-        row = self.airlines_df[self.airlines_df['CALLSIGN'] == best_match].iloc[0]
+        # Find row(s) where PRONOUNCIATION or CALLSIGN matches best_pron
+        row = self.airlines_df[
+            self.airlines_df.apply(
+                lambda r: best_pron in [r['CALLSIGN'].upper()] + 
+                          ([p.strip().upper() for p in str(r['PRONOUNCIATION']).split(",")] if pd.notna(r['PRONOUNCIATION']) else []),
+                axis=1
+            )
+        ].iloc[0]
+
         icao = row['ICAO']
         CALLSIGN = row['CALLSIGN'] + numbers_part  # append numeric suffix
         self.logger.info(f"[AirlineMatcher] Input '{text_CALLSIGN}' matched to '{CALLSIGN}' ({icao})")
         return icao, CALLSIGN
 
+
 # Example usage
 if __name__ == "__main__":
     matcher = AirlineMatcher()
-    test_CALLSIGNs = ["SPEERBIRD", "SPIRBROUGH", "FINEIR522", "LUFTTHANSSA"]
+    test_CALLSIGNs = ["SPEERBIRD", "SPIRBROUGH", "FINEIR522", "LUFTTHANSSA", "AIR CHINA552"]
     for c in test_CALLSIGNs:
         icao, CALLSIGN = matcher.match_CALLSIGN(c)
         print(f"Input: {c} → Matched ICAO: {icao}, CALLSIGN: {CALLSIGN}")

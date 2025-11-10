@@ -14,13 +14,50 @@ class ATCTextToJSON:
             self.logger = logging.getLogger("ATCTextToJSON")
         else:
             self.logger = logger
-        self.logger.info("[ATCTextToJSONRegex] Init Ok!")
+        self.logger.info("[ATCTextToJSON] Init Ok!")
 
         # --- Initialize airline matcher ---
         if not os.path.isfile(airlines_csv):
             raise FileNotFoundError(f"Airlines CSV not found: {airlines_csv}")
         self.airline_matcher = AirlineMatcher(csv_path=airlines_csv, logger=self.logger)
-        self.logger.info("[ATCTextToJSONRegex] Airline matcher initialized")
+        self.logger.info("[ATCTextToJSON] Airline matcher initialized")
+
+
+    def _words_to_digits(self, text: str) -> str:
+        """
+        Replace both ICAO-style and normal number words with digits.
+        Keeps digits intact. For example:
+        'ONE WUN TREE FOWER 567' -> '1124567'
+        """
+
+        # Mapping of words to digits (both ICAO and normal words)
+        WORD_TO_DIGIT = {
+            "ZERO": "0", "WUN": "1", "ONE": "1",
+            "TOO": "2", "TWO": "2",
+            "TREE": "3", "THREE": "3",
+            "FOWER": "4", "FOUR": "4",
+            "FIFE": "5", "FIVE": "5",
+            "SIX": "6",
+            "SEVEN": "7",
+            "AIT": "8", "EIGHT": "8",
+            "NINER": "9", "NINE": "9"
+        }
+
+        # Match only whole words
+        pattern = re.compile(r"\b(" + "|".join(WORD_TO_DIGIT.keys()) + r")\b", re.IGNORECASE)
+
+        def repl(match):
+            word = match.group(0).upper()
+            return WORD_TO_DIGIT.get(word, word)
+
+        text_normalized = pattern.sub(repl, text)
+
+        # Print/log if any changes occurred
+        if text != text_normalized:
+            print(f"[Words→Digits] Input: '{text}'")
+            print(f"[Words→Digits] Output: '{text_normalized}'")
+
+        return text_normalized
 
 
     def generate_json(self, text: str, json_path: str = None) -> dict:
@@ -49,19 +86,37 @@ class ATCTextToJSON:
         text = text.upper() # Convert to uppercase once       
         result = {}
 
+        # Convert string numbers to normal numbers in text
+        text = self._words_to_digits(text)
+
+        # Convert "TOO" (spoken "two") to digit 2
+        #text = re.sub(r'\bTOO\b', '2', text)
+
         # Remove spurious "OR" tokens and normalize whitespace
         # Speech to text commonly translated 9 "niner" as "9 or"
         text = re.sub(r"\bOR\b", "", text)
+
         # Replace multiple spaces with one and remove leading/trailing spaces
         text = re.sub(r'\s+', ' ', text).strip() 
+
         # Remove spaces **between digits**
         text = re.sub(r'(?<=\d)\s+(?=\d)', '', text) # 9 9 9 -> 999
 
+        # Remove single letters between numbers (e.g., "2 A 3" → "23")
+        text = re.sub(r'(?<=\d)[A-Z](?=\d)', '', text)
+
+        print(f"ATC command to parse: {text}")
+
         # --- Callsign ---
-        m = re.match(r"([A-Z]+)\s?(\d+)", text)
+        # Extract the callsign, which must end with a number.
+        # If not found, signal ATC to repeat the command.
+        # In deployment, this could trigger TTS instead of raising an error.
+        m = re.match(r"([A-Z ]*\d+[A-Z\d]*)", text.upper())
         if m:
-            callsign = f"{m.group(1).capitalize()}{m.group(2)}"
+            callsign = m.group(1).replace(" ", "")
             result["icao"], result["callsign"] = self.airline_matcher.match_CALLSIGN(callsign)
+        else:
+            raise ValueError(f"SAY AGAIN: No valid callsign found in ATC command: '{text}'")
 
         # --- Turn direction and heading ---
         m = re.search(r"TURN\s+(LEFT|RIGHT)", text)
@@ -75,7 +130,7 @@ class ATCTextToJSON:
         # --- Vertical movement ---
         if re.search(r"CLIMB", text):
             result["vertical_movement"] = "climb"
-        elif re.search(r"DESCEND|DECENT", text):
+        elif re.search(r"DESCEND|DECENT|DESCENT", text):
             result["vertical_movement"] = "descent"
 
         # --- Altitude ---
@@ -97,8 +152,9 @@ class ATCTextToJSON:
         if m:
             result["speed"] = f"{m.group(1)}kts"
 
-        # --- QNH ---
-        m = re.search(r"QNH\s*(\d{3,4})", text)
+        # --- QNH / altimeter ---
+        # Accept minor mishears and optional space between token and number
+        m = re.search(r"\bQ[NMB]H?\s*(\d{3,4})\b", text)
         if m:
             result["qnh"] = m.group(1)
 
@@ -107,17 +163,15 @@ class ATCTextToJSON:
         if m:
             result["cleared_direct"] = m.group(1)
 
-        # --- Approach and runway ---
-        m = re.search(r"CLEARED\s+(ILS|VOR|RNAV)\s+APPROACH\s+(?:RWY|RUNWAY)?\s*(\d{2})", text)
+        # --- Parse approach type ---
+        m = re.search(r"\b(ILS|VOR|RNAV)\b", text)
         if m:
             result["approach"] = m.group(1)
-            result["runway"] = m.group(2)
-        else:
-            # Simple runway only case (e.g., CLEARED APPROACH RWY 22)
-            m = re.search(r"CLEARED\s+APPROACH\s+(?:RWY|RUNWAY)?\s*(\d{2})", text)
-            if m:
-                result["approach"] = "APPROACH"
-                result["runway"] = m.group(1)
+
+        # --- Parse runway number ---
+        m = re.search(r"\b(?:RWY|RUNWAY)\s*(\d{2})\b", text)
+        if m:
+            result["runway"] = m.group(1)
 
         # Save JSON for later use
         if json_path is not None:
@@ -128,14 +182,18 @@ class ATCTextToJSON:
 
         # Log result JSON and elapsed time
         elapsed = time.time() - start_time
-        self.logger.info(f"[Generate-JSON] Generated JSON '({elapsed:.2f}s)': {json.dumps(result, indent=4, ensure_ascii=False)}")
+        json_str = json.dumps(result, indent=4, ensure_ascii=False)
+        self.logger.info(f"[Generate-JSON] Generated JSON ({elapsed:.2f}s):\n{json_str}")
+
+        # Print JSON to console
+        print(f"[Generate-JSON] JSON output ({elapsed:.2f}s):\n{json_str}")
 
         self.logger.info(f"[Text→JSON] Parsed: {result}")
         return result
 
 
 if __name__ == "__main__":
-    parser = ATCTextToJSONRegex()
+    parser = ATCTextToJSON()
     tests = [
         "DELTA 209 TURN RIGHT HEADING 180 DESCEND TO 4000 FEET QNH 9 OR 9 OR 8 REDUCE SPEED TO 210 KNOTS",
         "FINNAIR 522 TURN LEFT HEADING 250 DESCENT TO FLIGHT LEVEL 360",
