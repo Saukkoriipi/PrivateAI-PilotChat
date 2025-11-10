@@ -163,7 +163,9 @@ class ATCJsonConverter:
         # Print and log response before and after number conversion
         response_text_words = self.num_to_words(response_text)
         self.logger.info(f"[JSON-to-PilotReply] Pilot readback ({elapsed:.2f}s): {response_text} ('{response_text_words}')")
-        print(f"[JSON-to-PilotReply] Pilot readback:\n  Original: {response_text}\n  Numbers→Words: {response_text_words}")
+        print(f"[JSON-to-PilotReply] Pilot readback:")
+        print(f"      Instruction: {response_text}")
+        print(f"    Pronunciation: {response_text_words}")
 
         return response_text_words
 

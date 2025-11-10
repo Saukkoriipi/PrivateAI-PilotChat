@@ -18,6 +18,8 @@ class pipeline:
         """
         self.results_folder = results_folder
         self.device = device
+        print(f"[INFO] Using device: {self.device }")
+        print(f"[INFO] Save results to: {self.results_folder}")
 
 
         # Initialize logger
@@ -58,6 +60,9 @@ class pipeline:
         #    Option 2: MMSTTS (faster, single voice)
         #self.tts = PilotTTS(device=device, logger=self.logger)
         self.tts = MMSTTS(device=device, logger=self.logger)
+
+        print("[INFO] ATC-Pilot chat initialization is complete and ready for use.\n")
+
 
     def run(self, audio_input, sample_id=0):
         print("*" * 10)
