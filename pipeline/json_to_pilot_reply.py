@@ -124,13 +124,16 @@ class ATCJsonConverter:
         # --- Approach and runway ---
         approach = json_data.get("approach")
         runway = json_data.get("runway")
+
         if approach and runway:
-            if runway:
-                # Full instruction with approach type and runway
-                parts.append(f"CLEARED {approach.upper()} APPROACH RUNWAY {runway}")
-            else:
-                # Approach type given, runway missing
-                parts.append(f"CONFORM RUNWAY")
+            # Full instruction with approach type and runway
+            parts.append(f"CLEARED {approach.upper()} APPROACH RUNWAY {runway}")
+        elif approach:
+            # Approach type given, runway missing
+            parts.append(f"CONFORM RUNWAY")
+        elif runway:
+            # Only runway provided
+            parts.append(f"RUNWAY {runway}")
 
         # --- QNH (barometric setting) ---
         qnh = json_data.get("qnh")

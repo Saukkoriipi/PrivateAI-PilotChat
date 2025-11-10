@@ -3,7 +3,7 @@ import logging
 import time
 import json
 import os
-from airline_matcher import AirlineMatcher
+from .airline_matcher import AirlineMatcher
 
 class ATCTextToJSON:
     """Lightweight regex-based ATC text-to-JSON parser."""

@@ -1,8 +1,8 @@
-from speech_to_text import WhisperASR
-from text_to_json import ATCTextToJSON
-from text_to_speech import PilotTTS
-from text_to_speech_fast import MMSTTS
-from json_to_pilot_reply import ATCJsonConverter
+from .speech_to_text import WhisperASR
+from .text_to_json import ATCTextToJSON
+from .text_to_speech import PilotTTS
+from .text_to_speech_fast import MMSTTS
+from .json_to_pilot_reply import ATCJsonConverter
 import glob
 import os
 import logging
