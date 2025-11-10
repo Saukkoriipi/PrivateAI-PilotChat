@@ -93,8 +93,9 @@ class ATCTextToJSON:
         #text = re.sub(r'\bTOO\b', '2', text)
 
         # Remove spurious "OR" tokens and normalize whitespace
-        # Speech to text commonly translated 9 "niner" as "9 or"
+        # Speech to text commonly translated 9 "niner" as "9 or" and "9 er"
         text = re.sub(r"\bOR\b", "", text)
+        text = re.sub(r"\bER\b", "", text)
 
         # Replace multiple spaces with one and remove leading/trailing spaces
         text = re.sub(r'\s+', ' ', text).strip() 
@@ -104,8 +105,6 @@ class ATCTextToJSON:
 
         # Remove single letters between numbers (e.g., "2 A 3" → "23")
         text = re.sub(r'(?<=\d)[A-Z](?=\d)', '', text)
-
-        print(f"ATC command to parse: {text}")
 
         # --- Callsign ---
         # Extract the callsign, which must end with a number.
@@ -125,7 +124,12 @@ class ATCTextToJSON:
 
         m = re.search(r"HEADING\s+(\d{2,3})", text)
         if m:
-            result["heading"] = int(m.group(1))
+            heading = int(m.group(1))
+            # Ensure QNH is within realistic atmospheric range
+            if 10 <= int(heading) <= 360:
+                result["heading"] = heading
+            else:
+                result["heading"] = "SAY AGAIN HEADING"
 
         # --- Vertical movement ---
         if re.search(r"CLIMB", text):
@@ -142,6 +146,13 @@ class ATCTextToJSON:
             if m:
                 result["to_altitude"] = f"{m.group(1)}ft"
 
+        # --- Handle missing altitude with vertical movement ---
+        if "vertical_movement" in result and "to_altitude" not in result:
+            # Remove vertical movement since altitude is missing
+            del result["vertical_movement"]
+            # Prompt ATC to repeat altitude
+            result["to_altitude"] = "SAY AGAIN ALTITUDE"
+
         # --- Speed ---
         if re.search(r"REDUCE\s+SPEED", text):
             result["speed_movement"] = "reduce"
@@ -154,17 +165,17 @@ class ATCTextToJSON:
 
         # --- QNH / altimeter ---
         # Accept common mishears like QNH, QMH, QNB, QNS and optional space before number
-        m = re.search(r"\bQ(?:N[HMSB]?|M[HNSB]?)\s*(\d{3,4})\b", text)
+        m = re.search(r"\bQ(?:N[HMSB]?|M[HNSB]?)\s*(\d{3,5})\b", text)
         if m:
             qnh_val = m.group(1)
             # Ensure QNH is within realistic atmospheric range
             if 800 <= int(qnh_val) <= 1200:
                 result["qnh"] = qnh_val
             else:
-                result["qnh"] = "SAY AGAIN QNH"
+                result["qnh"] = "SAY AGAIN Q-N-H"
 
         # --- Cleared direct fix ---
-        m = re.search(r"CLEARED\s+DIRECT\s+([A-Z]{3,6})", text)
+        m = re.search(r"DIRECT\s+([A-Z]{3,6})", text)
         if m:
             result["cleared_direct"] = m.group(1)
 
@@ -192,7 +203,6 @@ class ATCTextToJSON:
 
         # Print JSON to console
         print(f"[Generate-JSON] JSON output ({elapsed:.2f}s):\n{json_str}")
-
         self.logger.info(f"[Text→JSON] Parsed: {result}")
         return result
 

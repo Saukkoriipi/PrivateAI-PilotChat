@@ -81,7 +81,7 @@ class AirlineMatcher:
 # Example usage
 if __name__ == "__main__":
     matcher = AirlineMatcher()
-    test_CALLSIGNs = ["SPEERBIRD", "SPIRBROUGH", "FINEIR522", "LUFTTHANSSA", "AIR CHINA552"]
+    test_CALLSIGNs = ["SPEERBIRD", "FINDER", "SPIRBROUGH", "FINEIR522", "LUFTTHANSSA", "AIR FRANSA"]
     for c in test_CALLSIGNs:
         icao, CALLSIGN = matcher.match_CALLSIGN(c)
         print(f"Input: {c} → Matched ICAO: {icao}, CALLSIGN: {CALLSIGN}")

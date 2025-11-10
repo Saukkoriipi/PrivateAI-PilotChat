@@ -1,8 +1,9 @@
-from .speech_to_text import WhisperASR
+from .speech_to_text import ASR
 from .text_to_json import ATCTextToJSON
 from .text_to_speech import PilotTTS
 from .text_to_speech_fast import MMSTTS
 from .json_to_pilot_reply import ATCJsonConverter
+from .csv_logger import CommandCSVLogger
 import glob
 import os
 import logging
@@ -10,7 +11,7 @@ import time
 
 
 class pipeline:
-    def __init__(self, results_folder, device="cuda"):
+    def __init__(self, results_folder, device="cpu"):
         """
         Initialize all models used in the ATC-to-Pilot pipeline.
         Returns a dict with model instances.
@@ -30,14 +31,18 @@ class pipeline:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.info("Pipeline initialized")
 
+        # Initialize ATC commands logger
+        self.csv_logger = CommandCSVLogger(csv_path=os.path.join(results_folder, "commands_log.csv"),
+                                           logger=self.logger)
+
         # Initialize models for the ATC-to-Pilot pipeline
 
         # 1. Automatic Speech Recognition (ASR)
         #    Converts ATC spoken commands into text
-        self.asr = WhisperASR(model_name="openai/whisper-small", 
-                              device=device, 
-                              logger=self.logger
-                              )
+        self.asr = ASR(model_name="openai/whisper-small", 
+                       device=device, 
+                       logger=self.logger
+                       )
         
         # 2. ATC Text → JSON Parser
         #    Extracts structured ATC instructions (heading, altitude, QNH, etc.) from text.
@@ -54,8 +59,8 @@ class pipeline:
         #self.tts = PilotTTS(device=device, logger=self.logger)
         self.tts = MMSTTS(device=device, logger=self.logger)
 
-
     def run(self, audio_input, sample_id=0):
+        print("*" * 10)
         self.logger.info(f"[pipeline.run] Start processing: {audio_input}")
         start_time = time.time()  # start full pipeline timer
 
@@ -65,7 +70,6 @@ class pipeline:
 
         # 1. ATC audio → text
         atc_text = self.asr.transcribe(audio_input)
-        print(f"ATC command: {atc_text}")
 
         # 2. ATC text → structured command JSON
         command_json = self.parser.generate_json(atc_text, json_path)
@@ -78,8 +82,15 @@ class pipeline:
         description = "Realistic female voice in the 20s age with british accent. Normal pitch, warm timbre, fast pacing."
         pilot_speech, samplerate = self.tts.synthesize(pilot_text, description)
         self.tts.save(pilot_speech, audio_path)
-        
-        # Log total time
+
+        # 5. Log parsed command to CSV
+        #    Uses CommandCSVLogger to append the structured JSON to a central CSV log.
+        #    Keeps a dataframe in memory for fast access and automatically adds a timestamp.
+        #    Saves the CSV after each append, ensuring persistent logging of all commands.
+        #    Executed after speech-to-text and JSON parsing, so it does not block the main pipeline.
+        self.csv_logger.append(atc_text, command_json)
+
+        # 6. Log total time
         self.logger.info(f"[pipeline.run] Finished processing in '{(time.time() - start_time):.2f}' seconds")
 
         return pilot_speech, samplerate

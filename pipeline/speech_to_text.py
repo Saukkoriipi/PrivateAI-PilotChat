@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 import re
 
-class WhisperASR:
+class ASR:
     def __init__(self, model_name, device, logger):
         """
         Initialize Whisper ASR model and processor.
@@ -17,7 +17,7 @@ class WhisperASR:
         self.device = device
         self.processor = WhisperProcessor.from_pretrained(model_name)
         self.model = WhisperForConditionalGeneration.from_pretrained(model_name).to(self.device)
-        self.logger.info(f"[WhisperASR] Init Ok! Device: {self.device}")
+        self.logger.info(f"[ASR] Init Ok! Device: {self.device}")
 
     def transcribe(self, file_path):
         """
@@ -56,7 +56,8 @@ class WhisperASR:
     
         # Print results
         elapsed = time.time() - start_time
-        self.logger.info(f"[WhisperASR] Transcription result '({elapsed:.2f}s)': '{transcription}'")
+        self.logger.info(f"[ASR] Transcription result '({elapsed:.2f}s)': '{transcription}'")
+        print(f"[ASR] Pilot command: '({elapsed:.2f}s)': '{transcription}'")
 
         return transcription
 
@@ -72,12 +73,12 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S",
         filename="demo/output/speech_to_text.log"
     )
-    logger = logging.getLogger("WhisperASR_Test")
+    logger = logging.getLogger("ASR_Test")
 
     # Initialize model
     model_name = "openai/whisper-small"
     device = "cuda"
-    asr = WhisperASR(model_name=model_name, device=device, logger=logger)
+    asr = ASR(model_name=model_name, device=device, logger=logger)
 
     # Run transcription
     transcription = asr.transcribe(audio_file)

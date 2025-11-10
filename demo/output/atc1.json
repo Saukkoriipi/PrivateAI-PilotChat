@@ -1,6 +1,8 @@
 {
-    "callsign": "Fiend",
-    "heading": "360",
-    "to_altitude": "2000",
-    "vertical_movement": "descent"
+    "icao": "BAW",
+    "callsign": "SPEEDBIRD327",
+    "turn_direction": "left",
+    "heading": 270,
+    "vertical_movement": "descent",
+    "to_altitude": "FL280"
 }

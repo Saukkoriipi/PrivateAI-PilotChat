@@ -8,10 +8,10 @@ from scipy.signal import resample
 
 
 class MMSTTS:
-    def __init__(self, model_name="facebook/mms-tts-eng", device="cuda", logger=None):
+    def __init__(self, model_name="facebook/mms-tts-eng", speed_factor=1.15, device="cuda", logger=None):
         # Define device and speed_factor
         self.device = torch.device(device)
-        self.speed_factor = 1.15
+        self.speed_factor = speed_factor
 
         # Logger setup
         if logger:
@@ -45,7 +45,7 @@ class MMSTTS:
 
         return waveform_fast
 
-    def synthesize(self, text: str, description: str):
+    def synthesize(self, text: str, description: str=None):
         """Generate waveform from text with timing."""
         start_time = time.time()
 
@@ -82,13 +82,12 @@ if __name__ == "__main__":
     # User-defined device
     device = "cuda"  # or "cpu"
 
-    tts = MMSTTS(device=device, logger=logger)
+    tts = MMSTTS(device=device, speed_factor=1.15, logger=logger)
 
-    text = "Finnair five five two papa, turn left heading two seven zero, descend to flight level two eight zero."
-    speed_factor = 1.15
-    filename = "pilot.wav"
+    text = "Finnair five turn left heading two seven zero"
+    filename = "../demo/output/atc1.wav"
 
-    waveform = tts.synthesize(text, speed_factor=speed_factor)
+    waveform, samplerate = tts.synthesize(text)
     tts.save(waveform, filename)
 
     logger.info(f"Run completed. Output: {filename}")

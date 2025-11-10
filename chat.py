@@ -75,7 +75,7 @@ class ATCtoPilotChat:
                 self.logger.info(f"[Recorder] Saved temporary atc_command to {tmp_file.name}")
 
                 # Run pipeline
-                pilot_answer, samplerate = self.pipeline.run(tmp_file.name, sample_id="temp")
+                pilot_answer, samplerate = self.pipeline.run(tmp_file.name, sample_id="live_test")
 
                 # Play the pilot speech immediately at correct samplerate
                 self.logger.info("[TTS] Playing pilot response...")

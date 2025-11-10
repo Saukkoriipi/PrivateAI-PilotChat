@@ -1,7 +1,8 @@
 {
-    "callsign": "FINAIR522",
+    "icao": "FIN",
+    "callsign": "FINNAIR522",
     "turn_direction": "left",
-    "heading": "250",
+    "heading": 250,
     "vertical_movement": "descent",
-    "to_altitude": "360"
+    "to_altitude": "FL360"
 }

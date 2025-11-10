@@ -1,7 +1,11 @@
 {
-    "callsign": "FINAIR522",
-    "turn_direction": "left",
-    "heading": "250",
-    "to_altitude": "360",
-    "vertical_movement": "descent"
+    "icao": "DAL",
+    "callsign": "DELTA209",
+    "turn_direction": "right",
+    "heading": 180,
+    "vertical_movement": "descent",
+    "to_altitude": "4000ft",
+    "speed_movement": "reduce",
+    "speed": "210kts",
+    "qnh": "998"
 }

@@ -29,7 +29,6 @@ class ATCJsonConverter:
         Convert numbers in text to ICAO-style spoken words.
         Letters are preserved. Thousands/hundreds are pronounced only if last two digits are zeros.
         """
-        print(f"[num_to_words] Input: '{text}'")
 
         digit_map = {
             "0": " ZERO",
@@ -69,7 +68,6 @@ class ATCJsonConverter:
         # Remove leading/trailing spaces and collapse multiple spaces
         text_out = " ".join(text_out.split())
 
-        print(f"[num_to_words] Output: '{text_out}'")
         return text_out
 
 
@@ -160,9 +158,14 @@ class ATCJsonConverter:
         # --- Combine all instructions into the final pilot readback ---
         # Numbers are converted to ICAO-style words so the TTS engine pronounces them correctly
         response_text = ", ".join(parts).upper()
-        response_text = self.num_to_words(response_text)
         elapsed = time.time() - start_time
+
+        # Print and log response before and after number conversion
         self.logger.info(f"[JSON-to-PilotReply] Generated pilot readback in {elapsed:.2f}s: {response_text}")
+        print(f"[JSON-to-PilotReply] Generated pilot readback: {response_text}")
+        response_text = self.num_to_words(response_text)
+        self.logger.info(f"[JSON-to-PilotReply] Generated pilot readback in {elapsed:.2f}s: {response_text}")
+        print(f"[JSON-to-PilotReply] Generated pilot readback: {response_text}")
 
         return response_text
 
