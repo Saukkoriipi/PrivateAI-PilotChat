@@ -11,6 +11,17 @@ Tested and safe components only.
 
 ---
 
+## Notes
+* The **ICAO recommends** a radiotelephony rate of **≤100 words per minute** to ensure clarity. Speaking faster may increase recognition errors in the system.
+* Only **predefined airlines** are recognized. The list is located at `pipeline/airlines.csv`. You can **edit this file** to add or remove recognizable callsigns.
+* The **simulator expects callsigns** to start with letters and end with numbers. For example, `AAL102` is valid, but `DLH5PP` is not.
+* In testing, the system is mostly robust. **Most common errors occur in the callsign**. For this reason, `pipeline/airlines.csv` allows users to add **more than one acceptable pronunciation per airline**.
+* To **further improve the pipeline**, focus on **audio-to-parsed command translation**. Precomputing pronunciation options for standard phraseology can make runtime matching more robust with minimal overhead. LLM-based approaches (we tested this) also work but are too slow for fully real-time, local use. Conversion from parsed command → text → audio is relatively trivial task.
+* Future plan: integrate **ATC-Pilot Chat** into **Bluesky ATC Simulator** ([PyPI link](https://pypi.org/project/bluesky-simulator/)) for a fully voice-driven ATC simulation experience.
+
+
+---
+
 ## Hardware & System Requirements
 
 * Works on **GPU and CPU**. GPU is optional but speeds up processing.
@@ -74,9 +85,6 @@ Tested and safe components only.
   3. Generate ICAO-style pilot readback
   4. Produce a synthetic pilot voice
   5. Log commands as JSON and CSV formats
-
-> ⚠️ ICAO recommends a radiotelephony rate ≤100 words per minute for clarity.
-> Speaking faster may reduce recognition accuracy.
 
 ---
 
