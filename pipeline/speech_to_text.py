@@ -67,7 +67,7 @@ class ASR:
 
 
 if __name__ == "__main__":
-    # Manual test: run with `python3 pipeline/audio_to_text.py`
+    # Manual test: run with `python3 pipeline/speech_to_text.py`
     audio_file = "demo/input/atc2.wav"
 
     # Initialize logger

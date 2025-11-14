@@ -3,7 +3,11 @@ import logging
 import time
 import json
 import os
-from .airline_matcher import AirlineMatcher
+try:
+    from .airline_matcher import AirlineMatcher
+except:
+    from airline_matcher import AirlineMatcher
+
 
 class ATCTextToJSON:
     """Lightweight regex-based ATC text-to-JSON parser."""
@@ -88,9 +92,6 @@ class ATCTextToJSON:
 
         # Convert string numbers to normal numbers in text
         text = self._words_to_digits(text)
-
-        # Convert "TOO" (spoken "two") to digit 2
-        #text = re.sub(r'\bTOO\b', '2', text)
 
         # Remove spurious "OR" tokens and normalize whitespace
         # Speech to text commonly translated 9 "niner" as "9 or" and "9 er"
@@ -208,7 +209,7 @@ class ATCTextToJSON:
 
 
 if __name__ == "__main__":
-    parser = ATCTextToJSON()
+    parser = ATCTextToJSON(airlines_csv = "airlines.csv")
     tests = [
         "DELTA 209 TURN RIGHT HEADING 180 DESCEND TO 4000 FEET QNH 9 OR 9 OR 8 REDUCE SPEED TO 210 KNOTS",
         "FINNAIR 522 TURN LEFT HEADING 250 DESCENT TO FLIGHT LEVEL 360",
